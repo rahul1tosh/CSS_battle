@@ -1,0 +1,54 @@
+.Jonathan{
+  width: 35%;
+  background-color: #6C4AB6;
+  color: white;
+}
+.Akola{
+  width: 20%;
+  background-color: white;
+  position: relative;
+  bottom: 15px;
+}
+.Patrick{
+  padding-bottom: 33.4px !important;
+  position: relative !important;
+  bottom : 20px;
+  background-color: #7F8487;
+  color: white;
+  width: 20%;
+}
+.Kira{
+  position: relative;
+  bottom: 10px;
+  padding-bottom: 5px !important;
+  background-color: #3C4048;
+  color: white;
+  width: 35%;
+}
+.Kumar{
+  position: relative;
+  top: 375px;
+  background-color: white;
+  width : 12%;
+  height: 100%;
+  margin-right: 200px !important;
+}
+.name{
+  display: inline;
+}
+.verified{
+  font-size: 12px;
+}
+img{
+  border-radius: 50%;
+}
+.outer{
+  display: inline-block;
+  margin: 0.6%;
+  padding: 10px;
+  border-radius: 10px;
+}
+body{
+  background-color: #CDF0EA;
+  padding-left: 250px;
+}
