@@ -1,0 +1,123 @@
+import requests
+import json
+import logging
+from oauth2client.client import GoogleCredentials
+
+logging.basicConfig(level=logging.INFO)
+
+def pull_pubsub_messages(project_id, subscription_name, max_messages=5):
+    """Pull messages from Pub/Sub subscription using REST API"""
+    
+    # Get authentication token
+    credentials = GoogleCredentials.get_application_default()
+    token = credentials.get_access_token().access_token
+    
+    # Prepare the API endpoint
+    url = "https://pubsub.googleapis.com/v1/projects/{}/subscriptions/{}:pull".format(
+        project_id, 
+        subscription_name
+    )
+    
+    # Prepare headers
+    headers = {
+        "Authorization": "Bearer {}".format(token),
+        "Content-Type": "application/json"
+    }
+    
+    # Prepare request body
+    payload = {
+        "maxMessages": max_messages,
+        "returnImmediately": False  # Wait for messages if none available
+    }
+    
+    try:
+        # Make the POST request
+        response = requests.post(
+            url,
+            headers=headers,
+            data=json.dumps(payload)
+        )
+        
+        # Check for errors
+        response.raise_for_status()
+        
+        # Process the response
+        if response.json().get("receivedMessages"):
+            messages = response.json()["receivedMessages"]
+            ack_ids = [msg["ackId"] for msg in messages]
+            
+            logging.info("Received {} messages".format(len(messages)))
+            
+            # Process each message
+            for message in messages:
+                msg_data = message["message"]["data"]
+                # In Python 2.7, the message data is base64 encoded
+                import base64
+                decoded_data = base64.b64decode(msg_data)
+                logging.info("Message content: {}".format(decoded_data))
+            
+            # Acknowledge the messages
+            acknowledge_messages(project_id, subscription_name, ack_ids)
+            
+            return messages
+        else:
+            logging.info("No messages available")
+            return []
+            
+    except requests.exceptions.RequestException as e:
+        logging.error("Error pulling messages: {}".format(str(e)))
+        raise
+
+def acknowledge_messages(project_id, subscription_name, ack_ids):
+    """Acknowledge received messages"""
+    
+    if not ack_ids:
+        return
+        
+    # Get authentication token
+    credentials = GoogleCredentials.get_application_default()
+    token = credentials.get_access_token().access_token
+    
+    # Prepare the API endpoint
+    url = "https://pubsub.googleapis.com/v1/projects/{}/subscriptions/{}:acknowledge".format(
+        project_id, 
+        subscription_name
+    )
+    
+    # Prepare headers
+    headers = {
+        "Authorization": "Bearer {}".format(token),
+        "Content-Type": "application/json"
+    }
+    
+    # Prepare request body
+    payload = {
+        "ackIds": ack_ids
+    }
+    
+    try:
+        # Make the POST request
+        response = requests.post(
+            url,
+            headers=headers,
+            data=json.dumps(payload)
+        )
+        response.raise_for_status()
+        logging.info("Successfully acknowledged {} messages".format(len(ack_ids)))
+    except requests.exceptions.RequestException as e:
+        logging.error("Error acknowledging messages: {}".format(str(e)))
+        raise
+
+if __name__ == '__main__':
+    PROJECT_ID = 'your-project-id'
+    SUBSCRIPTION_NAME = 'your-subscription-name'
+    
+    while True:
+        try:
+            pull_pubsub_messages(PROJECT_ID, SUBSCRIPTION_NAME)
+            # Sleep for a bit before checking again
+            import time
+            time.sleep(5)
+        except KeyboardInterrupt:
+            logging.info("Shutting down...")
+            break
