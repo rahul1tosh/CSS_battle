@@ -1,0 +1,22 @@
+from google.cloud import pubsub_v1
+import os
+
+# Set the service account key file path
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "path/to/service-account.json"
+
+# Initialize the Pub/Sub client
+subscriber = pubsub_v1.SubscriberClient()
+
+# Define subscription path (must already exist)
+subscription_path = subscriber.subscription_path("your-project-id", "your-subscription-id")
+
+def callback(message):
+    print(f"Received message: {message.data}")
+    message.ack()  # Acknowledge the message to remove it from queue
+
+# Start listening to messages from the existing subscription
+subscriber.subscribe(subscription_path, callback=callback)
+
+print("Listening for messages...")
+while True:
+    pass
