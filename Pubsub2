@@ -1,0 +1,96 @@
+import requests
+import json
+import logging
+import time
+from oauth2client.client import GoogleCredentials
+
+logging.basicConfig(level=logging.INFO)
+
+def verify_subscription_config(project_id, subscription_name):
+    """Verify the subscription is properly configured for BigQuery write"""
+    credentials = GoogleCredentials.get_application_default()
+    token = credentials.get_access_token().access_token
+    
+    url = f"https://pubsub.googleapis.com/v1/projects/{project_id}/subscriptions/{subscription_name}"
+    
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+    
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        config = response.json()
+        
+        if 'bigqueryConfig' in config:
+            logging.info("Subscription is configured for BigQuery write:")
+            logging.info(f"BigQuery Table: {config['bigqueryConfig']['table']}")
+            logging.info(f"Dataset: {config['bigqueryConfig']['dataset']}")
+            logging.info(f"Write Metadata: {config['bigqueryConfig']['writeMetadata']}")
+            return True
+        else:
+            logging.error("Subscription is not configured for BigQuery write")
+            return False
+            
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Error checking subscription config: {str(e)}")
+        return False
+
+def check_bigquery_data(project_id, dataset_id, table_id, max_results=5):
+    """Check the BigQuery table for recently written data"""
+    credentials = GoogleCredentials.get_application_default()
+    token = credentials.get_access_token().access_token
+    
+    url = f"https://bigquery.googleapis.com/bigquery/v2/projects/{project_id}/datasets/{dataset_id}/tables/{table_id}/data"
+    
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+    
+    params = {
+        "maxResults": max_results
+    }
+    
+    try:
+        response = requests.get(url, headers=headers, params=params)
+        response.raise_for_status()
+        data = response.json()
+        
+        if 'rows' in data:
+            logging.info(f"Found {len(data['rows'])} recent rows in BigQuery table:")
+            for row in data['rows']:
+                logging.info(json.dumps(row, indent=2))
+            return True
+        else:
+            logging.info("No data found in BigQuery table")
+            return False
+            
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Error checking BigQuery data: {str(e)}")
+        return False
+
+def main():
+    PROJECT_ID = 'your-project-id'
+    SUBSCRIPTION_NAME = 'your-subscription-name'
+    DATASET_ID = 'your-dataset-id'  # From your BigQuery config
+    TABLE_ID = 'your-table-id'      # From your BigQuery config
+    
+    # First verify the subscription is properly configured
+    if not verify_subscription_config(PROJECT_ID, SUBSCRIPTION_NAME):
+        logging.error("Subscription not properly configured for BigQuery write")
+        return
+    
+    # Then periodically check BigQuery for new data
+    while True:
+        try:
+            logging.info("Checking BigQuery for new data...")
+            check_bigquery_data(PROJECT_ID, DATASET_ID, TABLE_ID)
+            time.sleep(60)  # Check every minute
+        except KeyboardInterrupt:
+            logging.info("Shutting down...")
+            break
+
+if __name__ == '__main__':
+    main()
