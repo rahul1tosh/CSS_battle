@@ -15,7 +15,8 @@ def createAspectType():
     path = "gs://us-central-sandbox-corp-cm-441-bockes/dags/your-file-name.json"
     gcFile = gcsfs.GCSFileSystem(project="sandon-corp-apad-devi-a0")
     with gcFile.open(path) as file:
-        aspect_type_body = json.load(file)
+        aspect_type_body = json.load(file) -- it contains the aspect type schema
+
 
     # Step 3: Prepare the API endpoint (replace with your actual Dataplex values)
     parent = "projects/your-project/locations/your-location/lakes/your-lake/zones/your-zone"
