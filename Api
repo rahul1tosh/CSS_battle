@@ -1,0 +1,50 @@
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+
+# Replace with your project ID and path to your service account key (if using)
+PROJECT_ID = "your-gcp-project-id"
+SCOPES = ["https://www.googleapis.com/auth/cloud-platform"]
+SERVICE_ACCOUNT_FILE = "path/to/your-service-account-key.json"
+
+# Optional: Read APIs from a file or define inline
+required_apis = [
+    "compute.googleapis.com",
+    "storage.googleapis.com",
+    "bigquery.googleapis.com",
+    "serviceusage.googleapis.com",  # Must be enabled for this script to work
+]
+
+def get_enabled_apis(project_id):
+    credentials = service_account.Credentials.from_service_account_file(
+        SERVICE_ACCOUNT_FILE, scopes=SCOPES
+    )
+    service = build("serviceusage", "v1", credentials=credentials)
+
+    request = service.services().list(parent=f"projects/{project_id}", filter="state:ENABLED")
+    enabled_apis = []
+
+    while request is not None:
+        response = request.execute()
+        for service_item in response.get("services", []):
+            enabled_apis.append(service_item["config"]["name"])
+        request = service.services().list_next(previous_request=request, previous_response=response)
+
+    return enabled_apis
+
+def check_missing_apis(required, enabled):
+    return [api for api in required if api not in enabled]
+
+def main():
+    print(f"Checking enabled APIs for project: {PROJECT_ID}")
+    enabled = get_enabled_apis(PROJECT_ID)
+    missing = check_missing_apis(required_apis, enabled)
+
+    if missing:
+        print("🔴 Missing APIs:")
+        for api in missing:
+            print(f" - {api}")
+    else:
+        print("✅ All required APIs are enabled.")
+
+if __name__ == "__main__":
+    main()
