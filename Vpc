@@ -1,0 +1,36 @@
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+
+# Replace with your values
+PROJECT_ID = "your-project-id"
+REGION = "your-region"  # e.g., "us-central1"
+FUNCTION_NAME = "your-function-name"
+SERVICE_ACCOUNT_FILE = "path/to/service-account.json"
+
+SCOPES = ["https://www.googleapis.com/auth/cloud-platform"]
+
+def get_function_vpc_info(project_id, region, function_name):
+    credentials = service_account.Credentials.from_service_account_file(
+        SERVICE_ACCOUNT_FILE, scopes=SCOPES
+    )
+    service = build("cloudfunctions", "v1", credentials=credentials)
+
+    # Construct full function name path
+    function_path = f"projects/{project_id}/locations/{region}/functions/{function_name}"
+
+    try:
+        function = service.projects().locations().functions().get(name=function_path).execute()
+        vpc_connector = function.get("vpcConnector")
+        egress_setting = function.get("vpcConnectorEgressSettings")
+
+        if vpc_connector:
+            print(f"✅ VPC Connector is enabled: {vpc_connector}")
+            if egress_setting:
+                print(f"   Egress Setting: {egress_setting}")
+        else:
+            print("❌ VPC Connector is NOT enabled for this function.")
+    except Exception as e:
+        print(f"❗ Error fetching function info: {e}")
+
+if __name__ == "__main__":
+    get_function_vpc_info(PROJECT_ID, REGION, FUNCTION_NAME)
