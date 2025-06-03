@@ -1,0 +1,116 @@
+Here's a concise summary of each stage in a typical Jenkins pipeline, describing their roles in a DevSecOps CI/CD process:
+
+
+---
+
+1. Checkout
+
+Purpose: Retrieves source code from a version control system (e.g., Git).
+
+Key Actions: Checks out the latest code from a branch, tag, or commit.
+
+
+
+---
+
+2. TruffleHog Scan
+
+Purpose: Detects secrets in the codebase (e.g., API keys, passwords).
+
+Key Actions: Scans git history or files for high-entropy strings or secret patterns.
+
+
+
+---
+
+3. Build
+
+Purpose: Compiles the application source code.
+
+Key Actions: Executes build tools (e.g., Maven, Gradle, npm) to produce artifacts.
+
+
+
+---
+
+4. Inspect
+
+Purpose: Performs code quality and static analysis.
+
+Key Actions: Runs tools like SonarQube or custom linters to detect bugs, smells, and style issues.
+
+
+
+---
+
+5. Codesign
+
+Purpose: Signs the built artifacts to verify their authenticity and integrity.
+
+Key Actions: Uses a digital certificate to sign binaries or packages.
+
+
+
+---
+
+6. Publish
+
+Purpose: Deploys the build artifact to a repository or registry.
+
+Key Actions: Uploads to Artifactory, Nexus, DockerHub, PyPI, etc.
+
+
+
+---
+
+7. Scan
+
+Purpose: General security scanning stage (may be a placeholder for multiple tools).
+
+Key Actions: Runs various security tests (could overlap with Checkmarx/BlackDuck).
+
+
+
+---
+
+8. Checkmarx Scan
+
+Purpose: Static Application Security Testing (SAST).
+
+Key Actions: Analyzes source code for vulnerabilities without executing it.
+
+
+
+---
+
+9. BlackDuck Scan
+
+Purpose: Software Composition Analysis (SCA).
+
+Key Actions: Identifies open-source components and associated license/compliance risks.
+
+
+
+---
+
+10. SCM
+
+Purpose: Source Control Management operations.
+
+Key Actions: Can include commit, push, or update of metadata post-build.
+
+
+
+---
+
+11. Tag
+
+Purpose: Marks a specific commit or build in version control.
+
+Key Actions: Creates a Git tag (e.g., v1.2.3) for traceability or release tracking.
+
+
+
+---
+
+Let me know if you want a visual flow diagram or a table format for this summary.
