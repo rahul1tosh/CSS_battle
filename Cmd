@@ -1,0 +1,3 @@
+gcloud projects get-iam-policy PROJECT_ID --flatten="bindings[].members" \
+--filter="bindings.members:your-email@example.com" \
+--format="table(bindings.role)"
