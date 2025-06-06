@@ -1,0 +1,21 @@
+import subprocess
+
+# Step 1: Get all Cloud Functions (1st gen only)
+list_cmd = 'gcloud functions list --format="value(name,region)"'
+list_result = subprocess.run(list_cmd, shell=True, capture_output=True, text=True)
+
+functions = list_result.stdout.strip().split('\n')
+
+# Step 2: Check each function for VPC connector
+for func in functions:
+    if not func.strip():
+        continue
+    name, region = func.strip().split()
+    describe_cmd = f'gcloud functions describe {name} --region={region} --format="value(vpcConnector)"'
+    describe_result = subprocess.run(describe_cmd, shell=True, capture_output=True, text=True)
+    vpc_connector = describe_result.stdout.strip()
+
+    if vpc_connector:
+        print(f"{name} in {region} → VPC connector enabled: {vpc_connector}")
+    else:
+        print(f"{name} in {region} → VPC connector NOT enabled.")
