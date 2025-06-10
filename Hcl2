@@ -1,0 +1,74 @@
+import hcl2
+import base64
+import requests
+import logging
+from pprint import pprint
+
+def get_module_variables_from_github(github_headers, environment, app_id, target_module_name):
+    """
+    Fetch main.tf from GitHub and extract variables from a specific module
+    
+    Args:
+        github_headers (dict): GitHub API headers
+        environment (str): Environment name (e.g., 'dev', 'prod')
+        app_id (str): Application ID
+        target_module_name (str): Name of the module to extract variables from
+        
+    Returns:
+        dict: Module variables or empty dict if not found
+    """
+    # 1. Construct the GitHub URL and fetch main.tf
+    project_prov = f'{environment}-{app_id}-project-provisioning'
+    url = f'{GITHUB_BASE_URL}/repos/TFE-GCP/{project_prov}/contents/main.tf?ref=master'
+    
+    response = requests.get(url, headers=github_headers)
+    
+    if response.status_code != 200:
+        error_msg = f'Failed to read main.tf: {response.json()}'
+        print(f'Failed to read the contents of main.tf. Refer to the {LOG_FILE} for the error')
+        logging.error(error_msg)
+        return {}
+    
+    # 2. Decode the file content
+    file_info = response.json()
+    content = base64.b64decode(file_info['content']).decode()
+    
+    # 3. Parse the HCL content
+    try:
+        tf_config = hcl2.loads(content)
+        
+        if 'module' not in tf_config:
+            logging.warning(f"No modules found in main.tf")
+            return {}
+            
+        modules = tf_config['module']
+        
+        if target_module_name not in modules:
+            logging.warning(f"Module '{target_module_name}' not found in main.tf")
+            return {}
+            
+        # Return all variables from the target module
+        return modules[target_module_name]
+        
+    except Exception as e:
+        logging.error(f"Error parsing main.tf: {str(e)}")
+        return {}
+
+# Example usage
+if __name__ == "__main__":
+    # Configure these values
+    GITHUB_BASE_URL = 'https://api.github.com'
+    github_headers = {'Authorization': 'token YOUR_GITHUB_TOKEN'}
+    environment = 'dev'
+    app_id = 'app123'
+    target_module = 'my_target_module'  # Change to your module name
+    
+    module_vars = get_module_variables_from_github(
+        github_headers,
+        environment,
+        app_id,
+        target_module
+    )
+    
+    print(f"Variables in module '{target_module}':")
+    pprint(module_vars)
