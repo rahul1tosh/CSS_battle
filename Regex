@@ -1,0 +1,17 @@
+import re
+
+terraform_refs = [
+    "${module.wf_prj_fact_apmf_sfr_nonprod_prj.terraform_service_account}",
+    "${module.wf_prj_fact_apmf_sit_nonprod_prj.terraform_service_account}",
+    "${module.wf_prj_fact_apmf_uat_nonprod_prj.terraform_service_account}",
+    "${module.wf_prj_fact_apmf_prep_nonprod_prj.terraform_service_account}"
+]
+
+# Extract just the module name
+module_names = []
+for ref in terraform_refs:
+    match = re.search(r"module\.([^.]+)\.terraform_service_account", ref)
+    if match:
+        module_names.append(match.group(1))
+
+print(module_names)
