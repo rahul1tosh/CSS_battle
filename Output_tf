@@ -1,0 +1,42 @@
+import hcl2
+
+def extract_project_numbers(tf_file_path):
+    with open(tf_file_path, 'r') as tf_file:
+        content = hcl2.load(tf_file)
+
+    output_block = content.get('output', {})
+    vpcsc_output = output_block.get('vpcsc_perimeters', {})
+    value_block = vpcsc_output.get('value', {})
+
+    project_numbers = []
+
+    # value_block should be a dict where keys are perimeter names
+    for perimeter_name, perimeter_data in value_block.items():
+        try:
+            project_services = perimeter_data.get('project_services', {})
+            cloudbuild_entry = project_services.get(
+                'local.vpc_sc_external_project_services.cloudbuild_googleapis_com', {}
+            )
+
+            for project_id_key, project_id_data in cloudbuild_entry.items():
+                project_number = project_id_data.get('project_number')
+                if project_number:
+                    project_numbers.append({
+                        'perimeter': perimeter_name,
+                        'project_id': project_id_key,
+                        'project_number': project_number
+                    })
+
+        except Exception as e:
+            print(f"⚠️ Error parsing perimeter '{perimeter_name}': {e}")
+
+    return project_numbers
+
+
+# === Usage ===
+tf_file_path = 'your_file.tf'  # Replace with your actual .tf file path
+
+result = extract_project_numbers(tf_file_path)
+
+for item in result:
+    print(f"✅ Perimeter: {item['perimeter']} → Project ID: {item['project_id']} → Project Number: {item['project_number']}")
