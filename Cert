@@ -1,29 +1,53 @@
 import hcl2
 
-# Read .tf file
-with open("your_file.tf", "r") as f:
+# File paths
+input_file = "locals.tf"
+output_file = "updated_locals.tf"
+
+# New items to add
+sa_key = "sa-sandbox-corp-apmf-2a94-fo@sandbox-corp-apmf-devl-2a04.iam.gserviceaccount.com"
+sa_value = { "ttl": "1h" }
+
+certs_key = "new-cert-tf"
+certs_value = ["sa-sandbox-corp-new-user"]
+
+# Step 1: Read the .tf file and parse
+with open(input_file, "r") as f:
     obj = hcl2.load(f)
 
-# Access locals block
+# Step 2: Access locals block (it is a list)
 locals_block = obj['locals'][0]
 
-# Add new SA entry
-new_key = "sa-sandbox-corp-apmf-2a94-fo@sandbox-corp-apmf-dev1-2a04.iam.gserviceaccount.com"
-new_value = { "ttl": "1h" }
+# Step 3: Update sa block
+if 'sa' in locals_block:
+    locals_block['sa'][sa_key] = sa_value
+else:
+    locals_block['sa'] = { sa_key: sa_value }
 
-locals_block['sa'][new_key] = new_value
+# Step 4: Update certs block
+if 'certs' in locals_block:
+    locals_block['certs'][certs_key] = certs_value
+else:
+    locals_block['certs'] = { certs_key: certs_value }
 
-# Build new 'sa' block as string
+# Step 5: Build new 'sa' block string
 sa_block = "sa = {\n"
 for key, value in locals_block['sa'].items():
     sa_block += f'  "{key}" = {{ ttl = "{value["ttl"]}" }}\n'
 sa_block += "}\n"
 
-# Rebuild the whole locals block (example)
-locals_text = f"locals {{\n\n{sa_block}\n}}\n"
+# Step 6: Build new 'certs' block string
+certs_block = "certs = {\n"
+for key, value in locals_block['certs'].items():
+    cert_list_str = ", ".join([f'"{v}"' for v in value])
+    certs_block += f'  "{key}" = [{cert_list_str}]\n'
+certs_block += "}\n"
 
-# Write back to new file (or same file)
-with open("updated_file.tf", "w") as f:
+# Step 7: Final locals block string
+locals_text = f'locals {{\n\n{sa_block}\n\n{certs_block}\n\n}}\n'
+
+# Step 8: Write updated file
+with open(output_file, "w") as f:
     f.write(locals_text)
 
-print("✅ Updated .tf file written!")
+print("✅ Updated locals.tf written to", output_file)
