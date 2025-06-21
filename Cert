@@ -1,0 +1,29 @@
+import hcl2
+
+# Read .tf file
+with open("your_file.tf", "r") as f:
+    obj = hcl2.load(f)
+
+# Access locals block
+locals_block = obj['locals'][0]
+
+# Add new SA entry
+new_key = "sa-sandbox-corp-apmf-2a94-fo@sandbox-corp-apmf-dev1-2a04.iam.gserviceaccount.com"
+new_value = { "ttl": "1h" }
+
+locals_block['sa'][new_key] = new_value
+
+# Build new 'sa' block as string
+sa_block = "sa = {\n"
+for key, value in locals_block['sa'].items():
+    sa_block += f'  "{key}" = {{ ttl = "{value["ttl"]}" }}\n'
+sa_block += "}\n"
+
+# Rebuild the whole locals block (example)
+locals_text = f"locals {{\n\n{sa_block}\n}}\n"
+
+# Write back to new file (or same file)
+with open("updated_file.tf", "w") as f:
+    f.write(locals_text)
+
+print("✅ Updated .tf file written!")
