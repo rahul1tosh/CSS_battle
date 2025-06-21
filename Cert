@@ -30,17 +30,21 @@ if 'certs' in locals_block:
 else:
     locals_block['certs'] = { certs_key: certs_value }
 
-# Step 5: Build new 'sa' block string
+# Step 5: Build new 'sa' block string — add commas except last
+sa_items = list(locals_block['sa'].items())
 sa_block = "sa = {\n"
-for key, value in locals_block['sa'].items():
-    sa_block += f'  "{key}" = {{ ttl = "{value["ttl"]}" }}\n'
+for i, (key, value) in enumerate(sa_items):
+    comma = "," if i < len(sa_items) - 1 else ""
+    sa_block += f'  "{key}" = {{ ttl = "{value["ttl"]}" }}{comma}\n'
 sa_block += "}\n"
 
-# Step 6: Build new 'certs' block string
+# Step 6: Build new 'certs' block string — add commas except last
+certs_items = list(locals_block['certs'].items())
 certs_block = "certs = {\n"
-for key, value in locals_block['certs'].items():
+for i, (key, value) in enumerate(certs_items):
     cert_list_str = ", ".join([f'"{v}"' for v in value])
-    certs_block += f'  "{key}" = [{cert_list_str}]\n'
+    comma = "," if i < len(certs_items) - 1 else ""
+    certs_block += f'  "{key}" = [{cert_list_str}]{comma}\n'
 certs_block += "}\n"
 
 # Step 7: Final locals block string
