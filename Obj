@@ -1,0 +1,30 @@
+Here is an enriched and polished version of your Objective section, suitable for documentation:
+
+
+---
+
+Objective
+
+The objective of this runbook is to provide clear guidance to tenants on migrating from legacy Tag Templates in Data Catalog to Aspect Types in the Dataplex Universal Catalog. This migration is critical as Tag Templates will be deprecated by January 2026, and organizations need to proactively transition their metadata strategies to align with Google's modern cataloging standards.
+
+Previously, Tag Templates were used to annotate metadata and enable CDM (Common Data Model) ingress pipelines. However, with the introduction of the Universal Dataplex Catalog, Google has introduced a more unified, scalable, and schema-flexible metadata platform. The new cataloging system supports Aspect Types, which offer more modular, extensible, and semantically rich metadata representations compared to the rigid structure of Tag Templates.
+
+This document outlines the key steps, prerequisites, validation checks, and best practices for a smooth migration. It aims to help data platform teams:
+
+Understand the architectural shift from Data Catalog to Dataplex Universal Catalog
+
+Map existing Tag Templates to Aspect Types
+
+Migrate entry groups and entries if required
+
+Validate metadata consistency and CDM pipeline compatibility
+
+Leverage enhanced cataloging capabilities like data lineage, policy tags, and entity-level versioning in Dataplex
+
+
+By following this runbook, tenants will ensure their data assets remain discoverable, governable, and future-ready as Google transitions to a more robust metadata management framework.
+
+
+---
+
+Let me know if you'd like to tailor it further for a specific audience (e.g. platform engineers, data stewards, GCP administrators).
