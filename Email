@@ -1,0 +1,27 @@
+Here is a refined and professional version of your email:
+
+
+---
+
+Subject: Clarification on Metadata Table for EPPS
+
+Hi Todd,
+
+I hope you're doing well.
+
+I wanted to check with you regarding the metadata storage for EPPS.
+What should be the name of the table that will store the metadata fetched from all three resource types — project, bucket, and dataset?
+
+Also, is it acceptable to store metadata for all these resource types in a single table, or would you recommend separate tables?
+
+Lastly, should this table be created in the apmf_z_ref dataset, or would you suggest using a different dataset?
+
+Looking forward to your guidance.
+
+Thanks and regards,
+Rahul
+
+
+---
+
+Let me know if you want a more formal or more concise version.
